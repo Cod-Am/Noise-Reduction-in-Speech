@@ -7,3 +7,10 @@
 * Youtube playlist - [Playlist](https://www.youtube.com/playlist?list=PL-wATfeyAMNqIee7cH3q1bh4QJFAaeNv0) by Valerio Velardo
 ## Research Papers: 
 * [Speech Background Noise Removal Using Different Linear Filtering Techniques](https://www.researchgate.net/publication/325622133_Speech_Background_Noise_Removal_Using_Different_Linear_Filtering_Techniques)
+## Libraries used: 
+* pandas
+* import numpy as np
+* matplotlib
+* librosa
+* sklearn
+* tensorflow
