@@ -4,4 +4,6 @@
 * CHiME - Home datset - https://archive.org/details/chime-home
 ## Study Resources:
 * Librosa quick tutorial for audio preprocessing - [link to resource](https://medium.com/@rijuldahiya/a-comprehensive-guide-to-audio-processing-with-librosa-in-python-a49276387a4b)
-* Youtube playlist - https://www.youtube.com/playlist?list=PL-wATfeyAMNqIee7cH3q1bh4QJFAaeNv0 by Valerio Velardo
+* Youtube playlist - [Playlist](https://www.youtube.com/playlist?list=PL-wATfeyAMNqIee7cH3q1bh4QJFAaeNv0) by Valerio Velardo
+## Research Papers: 
+* [Speech Background Noise Removal Using Different Linear Filtering Techniques](https://www.researchgate.net/publication/325622133_Speech_Background_Noise_Removal_Using_Different_Linear_Filtering_Techniques)
