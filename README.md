@@ -10,6 +10,8 @@
 ## Research Papers: 
 * [Reinforcement Learning To Adapt Speech Enhancement to Instantaneous Input Signal Quality](https://arxiv.org/pdf/1711.10791)
 * [Speech Background Noise Removal Using Different Linear Filtering Techniques](https://www.researchgate.net/publication/325622133_Speech_Background_Noise_Removal_Using_Different_Linear_Filtering_Techniques)
+## Discovered tools:
+* AI powered tool - [Resemble Enhance](https://huggingface.co/ResembleAI/resemble-enhance)
 ## Libraries used: 
 * pandas
 * import numpy as np
