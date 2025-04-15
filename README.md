@@ -7,6 +7,8 @@
 ## Dataset:
 * FSD50K dataset - https://zenodo.org/records/4060432
 * CHiME - Home datset - https://archive.org/details/chime-home
+* NOIZEUS dataset - https://ecs.utdallas.edu/loizou/speech/noizeus/
+* CHiME6 dataset - 
 * Github repo - https://github.com/jim-schwoebel/voice_datasets
 ## Study Resources:
 * Librosa quick tutorial for audio preprocessing - [link to resource](https://medium.com/@rijuldahiya/a-comprehensive-guide-to-audio-processing-with-librosa-in-python-a49276387a4b)
