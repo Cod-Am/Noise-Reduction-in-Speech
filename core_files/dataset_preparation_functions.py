@@ -12,7 +12,7 @@ def data_fetcher(path_to_ids_csv):
     return ids
 
 def mel_spectogram_converter(y):
-    mel_spec = librosa.feature.melspectrogram(y)
+    mel_spec = librosa.feature.melspectrogram(y=y,sr=22050,n_mels=256,n_fft=2048,hop_length=512)
     return mel_spec
 
 def soundfile_loader(id,base_path_to_soundfiles):
