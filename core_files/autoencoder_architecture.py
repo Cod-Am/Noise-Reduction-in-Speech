@@ -1,7 +1,4 @@
-import tensorflow as tf
-import keras
-from project.files.core_files.dataset_preparation_functions import data_fetcher
-
+from libs import tf
 class AutoEncoder:
     # creating an autoencoder architecture for denoising audio
     # encoder architecture
@@ -37,5 +34,5 @@ class AutoEncoder:
         self.autoencoder = tf.keras.Sequential([self.encoder,self.decoder])
         self.autoencoder.compile(optimizer='adam',loss='mse')
 
-    def train(self):
-        
+    def train(self,xtrain,xtest,ytrain,ytest,epochs=10,batch_size=32):
+        history = self.autoencoder.fit(xtrain,ytrain,batch_size=batch_size,epochs=epochs,validation_data=(xtest,ytest))

@@ -1,4 +1,4 @@
-import numpy as np
+from libs import tf,np
 
 def white_noise_adder(y, amplitude=5, noise_sigma=0.1):
     noise = amplitude * np.random.normal(0, noise_sigma, size=y.shape)
