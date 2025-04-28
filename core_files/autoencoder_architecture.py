@@ -7,11 +7,11 @@ class AutoEncoder:
             [
                 tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
                 tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=1),
+                tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=2),
                 tf.keras.layers.Conv2D(filters=32 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=1),
+                tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=2),
                 tf.keras.layers.Conv2D(filters=32 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=1),
+                tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=2),
                 tf.keras.layers.Conv2D(filters=16 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
                 tf.keras.layers.Conv2D(filters=16 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu')
             ]
@@ -28,7 +28,8 @@ class AutoEncoder:
                 tf.keras.layers.Conv2D(filters=32 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
                 tf.keras.layers.UpSampling2D(size=(2,2)),
                 tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu')
+                tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
+                tf.keras.layers.Conv2D(filters=1 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu')
             ]
         )
         self.autoencoder = tf.keras.Sequential([self.encoder,self.decoder])

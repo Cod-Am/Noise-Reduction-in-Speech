@@ -7,10 +7,9 @@ def formater(mel_specs):
     resized_mel_specs = tf.expand_dims(input = resized_mel_specs,axis = -1)
     return resized_mel_specs
 
-def splitter(mel_specs):
-    train_size = 0.8
+def splitter(mel_specs , train_size = 0.8):
     # finding out the range of indexes for train dataset
-    train_index = mel_specs.shape[0] * train_size
+    train_index = int(mel_specs.shape[0] * train_size)
     train_set = mel_specs[:train_index,:,:]
     test_set = mel_specs[train_index:,:,:]
     return train_set,test_set
