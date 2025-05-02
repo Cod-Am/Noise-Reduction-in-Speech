@@ -2,6 +2,8 @@ from libs import tf,pd,np,librosa
 
 from noise_mixer import white_noise_adder
 
+# functions for training autoencoder 
+
 # fetching targeted human voice files
 def data_fetcher(path_to_ids_csv):
     dataset = pd.read_csv(path_to_ids_csv)
@@ -41,7 +43,7 @@ def soundfile_loader(id,base_path_to_soundfiles):
         print(e)
         return []
 
-def dataset_maker(speech_ids_path, base_path_to_soundfiles):
+def dataset_maker_for_autoencoder(speech_ids_path, base_path_to_soundfiles):
     clean_mel_specs = []
     white_noise_mel_specs = []
     ids = data_fetcher(speech_ids_path)
@@ -51,14 +53,17 @@ def dataset_maker(speech_ids_path, base_path_to_soundfiles):
         # print(windowed_audio)
 
         mel_specs = mel_spectogram_converter(windowed_audio)
-        mel_specs = [np.asarray(mel_spec).astype(np.float16) for mel_spec in mel_specs]
+        mel_specs = [np.asarray(mel_spec).astype(np.float32) for mel_spec in mel_specs]
         for mel_spec in mel_specs:
             clean_mel_specs.append(mel_spec)
         
         # adding noise to the audio
         noise_added_audio = white_noise_adder(windowed_audio)
         mel_specs = mel_spectogram_converter(noise_added_audio)
-        mel_specs = [np.asarray(mel_spec).astype(np.float16) for mel_spec in mel_specs]
+        mel_specs = [np.asarray(mel_spec).astype(np.float32) for mel_spec in mel_specs]
         for mel_spec in mel_specs:
             white_noise_mel_specs.append(mel_spec)
     return clean_mel_specs , white_noise_mel_specs
+
+# functions for training asr system
+
