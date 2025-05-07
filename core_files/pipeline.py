@@ -1,6 +1,7 @@
-from dataset_preparation_functions import dataset_maker_for_autoencoder
+from dataset_preparation_functions import dataset_maker_for_autoencoder,dataset_maker_for_asr
 from pre_training_processor import pre_training_processor
 from autoencoder_architecture import AutoEncoder
+from asr_architecture import Model
 
 from libs import tf,pd,np,librosa,plt
 
@@ -18,4 +19,8 @@ def start_autoencoder_training_pipeline():
 
 def start_asr_training():
     base_path_to_soundfiles = '../../dataset/Chime-6' #also contains the transcriptions folder
-    transcriptions_folder = f'{base_path_to_soundfiles}/transcriptions/'    
+    transcriptions_folder = f'{base_path_to_soundfiles}/transcriptions/'
+    dataset,vocab_length = dataset_maker_for_asr(transcriptions_folder,base_path_to_soundfiles)
+    model = Model(vocab_size=vocab_length)
+    model.train(dataset)
+    model.save()
