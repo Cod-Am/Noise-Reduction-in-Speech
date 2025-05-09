@@ -20,11 +20,11 @@ class CNN_for_Residual_Block(tf.keras.layers.Layer):
             [
                 tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
                 tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=2),
+                # tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=2),
                 tf.keras.layers.Conv2D(filters=32 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=2),
+                # tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=2),
                 tf.keras.layers.Conv2D(filters=32 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=2),
+                # tf.keras.layers.MaxPool2D(pool_size=(2,2),strides=2),
                 tf.keras.layers.Conv2D(filters=16 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
                 tf.keras.layers.Conv2D(filters=16 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu')
             ]
@@ -34,14 +34,14 @@ class CNN_for_Residual_Block(tf.keras.layers.Layer):
             [
                 tf.keras.layers.Conv2D(filters=16 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
                 tf.keras.layers.Conv2D(filters=16 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.UpSampling2D(size=(2,2)),
+                # tf.keras.layers.UpSampling2D(size=(2,2)),
                 tf.keras.layers.Conv2D(filters=32 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.UpSampling2D(size=(2,2)),
+                # tf.keras.layers.UpSampling2D(size=(2,2)),
                 tf.keras.layers.Conv2D(filters=32 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.UpSampling2D(size=(2,2)),
+                # tf.keras.layers.UpSampling2D(size=(2,2)),
                 tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
                 tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.Conv2D(filters=1 , kernel_size=(2,2) , strides=1 , padding='same' , activation='sigmoid')
+                tf.keras.layers.Conv2D(filters=1 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu')
             ]
         )
 
@@ -80,7 +80,7 @@ class CNN_Block(tf.keras.layers.Layer):
                 tf.keras.layers.UpSampling2D(size=(2,2)),
                 tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
                 tf.keras.layers.Conv2D(filters=64 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu'),
-                tf.keras.layers.Conv2D(filters=128 , kernel_size=(2,2) , strides=1 , padding='same' , activation='sigmoid')
+                tf.keras.layers.Conv2D(filters=128 , kernel_size=(2,2) , strides=1 , padding='same' , activation='relu')
             ]
         )
 
@@ -95,8 +95,8 @@ class RNN_Block(tf.keras.layers.Layer):
         super().__init__(**kwargs)
         self.biderectional_rnn = tf.keras.Sequential(
             [
-                tf.keras.layers.Bidirectional(layer=tf.keras.layers.LSTM(128)),
-                tf.keras.layers.Bidirectional(layer=tf.keras.layers.LSTM(64)),
+                tf.keras.layers.Bidirectional(layer=tf.keras.layers.LSTM(128,return_sequences=True)),
+                tf.keras.layers.Bidirectional(layer=tf.keras.layers.LSTM(64,return_sequences=True)),
                 tf.keras.layers.Dense(256,activation = 'relu'),
                 tf.keras.layers.Dense(512,activation = 'relu'),
                 tf.keras.layers.Dense(1024,activation = 'relu'),
@@ -117,15 +117,22 @@ class ASR(tf.keras.Model):
         self.rnn = RNN_Block(vocab_size)
 
     def call(self,inputs):
+        # inputs = tf.expand_dims(inputs,axis=-1)
         Z = inputs
+
         for _ in range(2):
             Z = self.residual_block(Z)
-
+        
+        print(tf.shape(Z)) # (batch,h,w,c)
+        
         # reshaping cnn output for rnn block
         batch_size = tf.shape(Z)[0]
-        resolution = tf.shape(Z)[1] * tf.shape(Z)[2]  # height * width
-        channels = tf.shape(Z)[3]
-        Z = tf.reshape(Z, [batch_size , resolution , channels])
+        resolution = tf.shape(Z)[-1] * tf.shape(Z)[1]  # channel * height
+        width = tf.shape(Z)[2]
+        Z = tf.reshape(Z, [batch_size , width , resolution])
+
+        print(tf.shape(Z))
+        
         Z = self.rnn(Z)
         return Z
     
@@ -142,7 +149,7 @@ class Model:
     def train(self,dataset,batch_size = 16,epochs = 10):
         train_dataset,test_dataset = self.split(dataset)
         train_dataset = train_dataset.batch(batch_size)
-        self.model.fit(train_dataset, epochs = epochs,validation_data=test_dataset)
+        history = self.model.fit(train_dataset, epochs = epochs,validation_data=test_dataset)
 
 
     def save_model(self,path = './'):

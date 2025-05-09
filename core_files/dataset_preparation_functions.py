@@ -1,6 +1,6 @@
 import phonemizer.separator
 import sklearn.preprocessing
-from libs import tf,pd,np,librosa,json,time,datetime,string,os
+from libs import pd,np,librosa,json,time,datetime,string,os
 # import phonemizer
 # from phonemizer.backend.espeak.wrapper import EspeakWrapper
 
@@ -8,7 +8,7 @@ from libs import tf,pd,np,librosa,json,time,datetime,string,os
 import sklearn
 import nltk
 import joblib
-
+import tensorflow as tf
 from noise_mixer import white_noise_adder
 
 # functions for training autoencoder 
@@ -101,16 +101,29 @@ def dataset_maker_for_asr(base_path_to_transcrptions,base_path_to_soundfiles):
     print("complete")
     print("generating mel specs")
     mel_specs = timestamp_audio_file_synchronizer(targeted_transcriptions_paths , base_path_to_soundfiles)
-    print(mel_specs)
+    # print(mel_specs)
     print("complete")
-    # timestamps = timestamp_fetcher(targeted_timestamps_paths) # we need to fetch the timestamps to samples frames 
-    # mel_specs = audio_framing_and_processing(timestamps,base_path_to_soundfiles)
-    dataset = tf.data.Dataset.from_tensor_slices((processed_tanscriptions,mel_specs)) # compiling the data into a dataset
+    # debugging and checking for discrepency in the transcriptions and mel specs dataset
+    debugging_and_correction(processed_tanscriptions,mel_specs) 
+    
+    # convert mel specs to tensor and make a batch of 4 dimensions
+    mel_specs = tf.convert_to_tensor(mel_specs)
+    mel_specs = tf.expand_dims(mel_specs , axis = -1)
+
+    dataset = tf.data.Dataset.from_tensor_slices((mel_specs,processed_tanscriptions)) # compiling the data into a dataset
     return dataset,vocab_length
+
+def debugging_and_correction(transcriptions,mel_specs):
+    print(len(transcriptions),len(mel_specs))
+    transcriptions_shapes = [text.shape for text in transcriptions]
+    mel_spec_shapes = [mel_spec.shape for mel_spec in mel_specs]
+    print(list(set(transcriptions_shapes)))
+    print(list(set(mel_spec_shapes)))
 
 def transcriptions_path_generator(base_path):
     paths = []
-    targted_filenames = ['S01','S02','S03','S04','S05','S06','S07','S08','S09','S21']
+    # targted_filenames = ['S01','S02','S03','S04','S05','S06','S07','S08','S09','S21']
+    targted_filenames = ['S01']
     for filename in targted_filenames:
         path = f'{base_path}/{filename}.json'
         paths.append(path)
@@ -162,7 +175,19 @@ def trancriptions_to_vectors_converter(transcriptions):
         tokenised_sentence = nltk.word_tokenize(sentence)
         vector = label_encoder.transform(tokenised_sentence)
         label_encoded_text.append(vector)
-    return label_encoded_text,vocab_length
+    padded_sequence = padding_label_encoded_sequence(label_encoded_text)
+    return padded_sequence,vocab_length
+
+def padding_label_encoded_sequence(le_text):
+    shapes = [len(text) for text in le_text]
+    max_shape = max(shapes)
+    padded_le_texts = []
+    for text in le_text:
+        padding = max_shape - len(text)
+        # padded_text = text + [-1] * padding
+        padded_text = np.pad(text, (0, padding), 'constant', constant_values=(0, 0))
+        padded_le_texts.append(padded_text)
+    return padded_le_texts
 
 def remove_closed_captions(transcription):
     stack = []
@@ -181,14 +206,14 @@ def timestamp_audio_file_synchronizer(targeted_transcriptions_paths , base_path_
     for transcription_path,soundfile_path in zip(targeted_transcriptions_paths,soundfile_paths):
         timestamp_dataset = timestamp_fetcher(transcription_path)
         mel_specs = audio_framing_and_processing(timestamp_dataset,soundfile_path)
-        mel_spec_collection.append(mel_spec for mel_spec in mel_specs)
-    
+        mel_spec_collection.extend(mel_specs)
     return mel_spec_collection
 
 
 def soundfile_path_generation(base_path_to_soundfiles):
     paths = []
-    targted_filenames = ['S01','S02','S03','S04','S05','S06','S07','S08','S09','S21']
+    # targted_filenames = ['S01','S02','S03','S04','S05','S06','S07','S08','S09','S21']
+    targted_filenames = ['S01']
     for filename in targted_filenames:
         path = f'{base_path_to_soundfiles}/{filename}_U01.CH1.wav'
         paths.append(path)
@@ -213,26 +238,34 @@ def timestamp_fetcher(path):
 
 def audio_framing_and_processing(timestamps,path):
     mel_specs = []
+    windows = []
     y = soundfile_loader(path = path,mode = 0)
     for start_time , end_time in zip(timestamps['start_time'],timestamps['end_time']):
         # since our sample rate is 22050 throughout all our audios
         start_time_sample = time_to_sample_converter(start_time)
         end_time_sample = time_to_sample_converter(end_time)
         window = y[start_time_sample:end_time_sample + 1]
-        padded_signal = signal_padding(window)
+        windows.append(window)
+    padded_signals = signal_padding(windows)
+    for padded_signal in padded_signals:
         mel_spec = mel_spectogram_converter(y = padded_signal,mode=1)
         mel_specs.append(mel_spec)
     return mel_specs
 
 def signal_padding(signals):
     padded_signals = []
+    # print("Signals: ",signals)
+    # print(type(signals))
+    # print("1st Signal: ",signals[0])
+    # print(type(signals[0]))
+    # print(signals[0].shape)
     # gathing all shapes so as to we can find max shape and pad others accordingly
     shape_collection = [signal.shape[0] for signal in signals]
     max_shape = max(shape_collection)
     
     for signal in signals:
         padding = max_shape - signal.shape[0] + 5
-        padded_signal = np.pad(signal, pad_width = ((0,0) , (0,padding)))
+        padded_signal = np.pad(signal, (0, padding))
         padded_signals.append(padded_signal)
     return padded_signals
 
