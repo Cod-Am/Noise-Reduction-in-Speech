@@ -175,15 +175,13 @@ def trancriptions_to_vectors_converter(transcriptions):
         tokenised_sentence = nltk.word_tokenize(sentence)
         vector = label_encoder.transform(tokenised_sentence)
         label_encoded_text.append(vector)
-    padded_sequence = padding_label_encoded_sequence(label_encoded_text)
+    padded_sequence = padding_label_encoded_sequence(vocab_length,label_encoded_text)
     return padded_sequence,vocab_length
 
-def padding_label_encoded_sequence(le_text):
-    shapes = [len(text) for text in le_text]
-    max_shape = max(shapes)
+def padding_label_encoded_sequence(vocab_length,le_text):
     padded_le_texts = []
     for text in le_text:
-        padding = max_shape - len(text)
+        padding = vocab_length - len(text)
         # padded_text = text + [-1] * padding
         padded_text = np.pad(text, (0, padding), 'constant', constant_values=(0, 0))
         padded_le_texts.append(padded_text)
