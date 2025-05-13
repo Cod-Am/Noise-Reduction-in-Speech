@@ -96,7 +96,7 @@ class RNN_Block(tf.keras.layers.Layer):
         self.dense_256 = tf.keras.layers.Dense(256,activation='relu')
         # self.dense_vocab = tf.keras.layers.Dense(vocab_length,activation='relu')
         self.bi_lstm_128 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(128 , return_sequences=True))
-        self.bi_lstm_64 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64 , return_sequences=True))
+        self.bi_lstm_64 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(64))
 
     def call(self,inputs):
         Z = inputs
@@ -152,7 +152,7 @@ class Model:
         train_dataset,test_dataset = self.split(dataset)
         train_dataset = train_dataset.batch(batch_size)
         test_dataset = test_dataset.batch(batch_size)
-        history = self.model.fit(train_dataset, epochs = epochs,validation_data=test_dataset)
+        history = self.model.fit(train_dataset, epochs = epochs,validation_data=test_dataset,batch_size=batch_size)
 
 
     def save_model(self,path = './'):

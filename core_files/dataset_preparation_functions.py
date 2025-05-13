@@ -104,7 +104,7 @@ def dataset_maker_for_asr(base_path_to_transcrptions,base_path_to_soundfiles):
     # print(mel_specs)
     print("complete")
     # debugging and checking for discrepency in the transcriptions and mel specs dataset
-    debugging_and_correction(processed_tanscriptions,mel_specs) 
+    shape_and_status_check(processed_tanscriptions,mel_specs) 
     
     # convert mel specs to tensor and make a batch of 4 dimensions
     mel_specs = tf.convert_to_tensor(mel_specs)
@@ -113,8 +113,8 @@ def dataset_maker_for_asr(base_path_to_transcrptions,base_path_to_soundfiles):
     dataset = tf.data.Dataset.from_tensor_slices((mel_specs,processed_tanscriptions)) # compiling the data into a dataset
     return dataset,vocab_length
 
-def debugging_and_correction(transcriptions,mel_specs):
-    print(len(transcriptions),len(mel_specs))
+def shape_and_status_check(transcriptions,mel_specs):
+    print("Transcriptions shape: ",len(transcriptions),"Mel_specs shape: ",len(mel_specs))
     transcriptions_shapes = [text.shape for text in transcriptions]
     mel_spec_shapes = [mel_spec.shape for mel_spec in mel_specs]
     print(list(set(transcriptions_shapes)))
