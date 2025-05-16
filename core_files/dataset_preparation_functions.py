@@ -119,6 +119,8 @@ def shape_and_status_check(transcriptions,mel_specs):
     mel_spec_shapes = [mel_spec.shape for mel_spec in mel_specs]
     print(list(set(transcriptions_shapes)))
     print(list(set(mel_spec_shapes)))
+    print(mel_specs[0])
+    print(transcriptions[0])
 
 def transcriptions_path_generator(base_path):
     paths = []
@@ -159,33 +161,44 @@ def trancriptions_to_vectors_converter(transcriptions):
     label_encoder = sklearn.preprocessing.LabelEncoder()
     label_encoded_text = []
 
+    wrapped = [f'<{transcription}>' for transcription in transcriptions]
+
     # creating the phonemized text
     # separator = phonemizer.separator.Separator(word=' / ',phone=' ')
     # phonemised_transcriptions = phonemizer.phonemize(transcriptions,language='en-us',backend='espeak',separator=separator)
     
     # tokenising the text and flattening it to a list
-    tokenised_text = [token for sentence in transcriptions for token in nltk.word_tokenize(sentence)]
+    tokenised_text = [token for sentence in wrapped for token in sentence]
+    tokenised_text = tokenised_text
+    all_chars = sorted(set(tokenised_text))
+    all_chars.append('$')
+    all_chars.append('_')
     
     # fitting the label encoder on the list
-    label_encoder.fit(tokenised_text)
+    label_encoder.fit(all_chars)
     vocab_length = len(list(label_encoder.classes_))
+    pad_id = label_encoder.transform(['_'])[0]
     # saving label encoder fro prediction
     joblib.dump(label_encoder,'./label_encoder.pkl')
-    for sentence in transcriptions:
-        tokenised_sentence = nltk.word_tokenize(sentence)
-        vector = label_encoder.transform(tokenised_sentence)
+    
+    for sentence in wrapped:
+        letters = list(sentence)
+        vector = label_encoder.transform(letters)
         label_encoded_text.append(vector)
-    padded_sequence = padding_label_encoded_sequence(vocab_length,label_encoded_text)
+    padded_sequence = padding_label_encoded_sequence(label_encoded_text,pad_id)
     return padded_sequence,vocab_length
 
-def padding_label_encoded_sequence(vocab_length,le_text):
+def padding_label_encoded_sequence(le_text,pad_id):
     padded_le_texts = []
+    max_len = max(len(text) for text in le_text)
+    
     for text in le_text:
-        padding = vocab_length - len(text)
+        padding = max_len - len(text)
         # padded_text = text + [-1] * padding
-        padded_text = np.pad(text, (0, padding), 'constant', constant_values=(0, 0))
+        padded_text = np.pad(text, (0, padding), 'constant', constant_values=(pad_id,pad_id))
         padded_le_texts.append(padded_text)
-    return padded_le_texts
+    
+    return np.stack(padded_le_texts, axis=0)
 
 def remove_closed_captions(transcription):
     stack = []
