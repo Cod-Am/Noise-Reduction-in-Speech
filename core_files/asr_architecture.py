@@ -147,7 +147,7 @@ class ASR(tf.keras.Model):
         # tf.print("After Output Layer:", tf.shape(Z))
         return Z
     
-class Model:
+class ASRTrainer:
     def __init__(self,vocab_size,batch_size = 4):
         # training the model
         self.model = ASR(vocab_size = vocab_size)
@@ -174,11 +174,11 @@ class Model:
         # plotting mse
         plt.plot(history.history['loss'], label='CTC (training data)')
         plt.plot(history.history['val_loss'], label='CTC (validation data)')
-        plt.title('MSE for Model Denoising Performance')
+        plt.title('CTC Loss for ASR System Performance')
         plt.ylabel('CTC value')
         plt.xlabel('No. epoch')
         plt.legend(loc="upper left")
-        plt.savefig('./model_performance_graphs/mse_graph_denoising_autoencoder.png',bbox_inches = 'tight')
+        plt.savefig('./asr_model_performance_graphs/ctc_graph_asr_system.png',bbox_inches = 'tight')
         plt.show()
         plt.close()
 
